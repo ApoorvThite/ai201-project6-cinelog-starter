@@ -1,13 +1,29 @@
 # PR Response Doc — CineLog Watchlist Feature
 
 ## AI Usage
-Used Claude Code to explore the codebase (models.py, collection_service.py, test_collection.py)
-before reading the review comments, and to verify that grep found all call sites for
-save_to_watchlist before committing the rename. Also used it as a sounding board for Comments 4
-and 5 — I wrote draft positions first, then asked for counterarguments. The counterargument on
-Comment 4 (opt-in privacy is safer) was one I'd already acknowledged in my draft. The
-counterargument on Comment 5 (alphabetical is better for large lists) was real but I still think
-recency wins for the reasons below. No AI-generated prose made it into the final responses.
+Used an AI assistant throughout this project for codebase orientation and verification — not for
+writing design decisions.
+
+**Orientation (Milestone 1):** Asked it to summarize what `add_to_collection()` does step by
+step before implementing deduplication, and to describe the fixture pattern in `test_collection.py`
+before writing `test_watchlist.py`. Verified both explanations against the actual code before
+using them.
+
+**Stress-testing Comment 4 (visibility default):** After writing my own draft arguing for
+`public=True`, asked: "What counterargument would a careful code reviewer raise against keeping
+public=True as the default?" It surfaced the opt-in privacy argument (users may not realize their
+watchlist is immediately visible). I'd already acknowledged that tradeoff in my draft, so no
+change to the argument.
+
+**Stress-testing Comment 5 (sort order):** After writing my draft favoring date-added desc,
+asked for counterarguments. It pointed out that alphabetical is better for large watchlists where
+you're scanning for a specific title. I think that's a search/filter concern, not a list sort
+concern — noted it in the response but kept my position.
+
+**Commit format check:** Used it to review the final `git log --oneline` for conventional commit
+compliance before pushing.
+
+All code was written manually. No AI-generated prose appears in the design decision responses.
 
 ---
 
@@ -112,7 +128,21 @@ route comment that said `"film_id": <int>`.
 ForeignKey reference accordingly. Updated stale docstrings to say UUID instead of int.
 
 **How I verified no conflict remains:** `git log --oneline` shows no merge commits.
-`python -m pytest tests/ -v` — all tests pass. `git status` is clean.
+`python -m pytest tests/ -v` — 7/7. `git status` is clean.
+
+---
+
+## Final git log
+
+```
+1b13ef1 fix: update film_id type references to UUID after main branch migration
+fd9b9ee docs: add PR response doc with design decisions for Comments 4 and 5
+3d18954 fix: sort watchlist by date_added desc and add missing film relationship
+02b9efd test: add watchlist service tests
+b89243a fix: add deduplication check to prevent duplicate watchlist entries
+19acbb7 refactor: rename save_to_watchlist to add_to_watchlist
+38a4566 feat: add WatchlistEntry model and watchlist endpoints
+```
 
 ---
 
